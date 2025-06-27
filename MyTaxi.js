@@ -23,6 +23,9 @@ async function connectToMongoDB() {
         await client.connect();
         console.log("Connected to MongoDB!");
         db = client.db("testDB"); // Ensure this matches your DB name
+        // Test the connection immediately
+        await db.command({ ping: 1 });
+        console.log("Database ping successful");
     } catch (err) {
         console.error("MongoDB connection error:", err);
         process.exit(1); // Exit process if cannot connect to DB
@@ -275,6 +278,7 @@ app.delete('/drivers/:id', authenticate, authorize(['admin']), async (req, res) 
 // POST /users/register - Create a new user with isAdmin boolean
 app.post('/users/register', async (req, res) => {
     try {
+        if (!db) throw new Error("Database not connected");
         const { name, age, email, password, role, isAdmin } = req.body;
         if (!name || !age || !email || !password || typeof isAdmin !== 'boolean') {
             return res.status(400).json({ error: "Missing required fields or invalid 'isAdmin' type" });
