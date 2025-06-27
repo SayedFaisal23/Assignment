@@ -3,50 +3,91 @@ const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const path = require('path');
 
 const saltRounds = 10;
-const { MongoClient, ObjectId } = require('mongodb');
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 let db;
+let client; // Track client for proper cleanup
 
 // Connect to MongoDB
 async function connectToMongoDB() {
-    const uri = "mongodb://localhost:27017";
-    const client = new MongoClient(uri);
+    const uri = process.env.MONGODB_URI || "mongodb://localhost:27017";
+    
+    client = new MongoClient(uri, {
+        serverApi: {
+            version: ServerApiVersion.v1,
+            strict: true,
+            deprecationErrors: true,
+        }
+    });
 
     try {
         await client.connect();
-        console.log("Connected to MongoDB!");
-        db = client.db("testDB"); // Ensure this matches your DB name
-        // Test the connection immediately
+        db = client.db("testDB");
+        console.log("✅ Successfully connected to MongoDB!");
+        
+        // Test connection immediately
         await db.command({ ping: 1 });
         console.log("Database ping successful");
     } catch (err) {
-        console.error("MongoDB connection error:", err);
-        process.exit(1); // Exit process if cannot connect to DB
+        console.error("❌ MongoDB connection failed:", err);
+        process.exit(1); // Exit if DB connection fails
     }
 }
 
-connectToMongoDB();
+// Initialize connection when starting
+connectToMongoDB().then(() => {
+    app.listen(port, () => {
+        console.log(`Server running on port ${port}`);
+    });
+});
 
+// Proper cleanup on exit
+process.on('SIGTERM', async () => {
+    if (client) {
+        await client.close();
+        console.log('MongoDB connection closed');
+    }
+    process.exit(0);
+});
+
+// Health check endpoints
+app.get('/health', (req, res) => {
+    res.json({ status: 'OK', timestamp: new Date() });
+});
+
+app.get('/db-health', async (req, res) => {
+    try {
+        if (!db) throw new Error("Database not initialized");
+        await db.command({ ping: 1 });
+        res.json({ 
+            status: "healthy", 
+            db: db.databaseName,
+            collections: await db.listCollections().toArray()
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Static files
 app.use(express.static('public'));
 
-// Route to dashboard (optional)
-app.get('/dashboard', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/dashboard.html'));
-});
-
+// Basic routes
 app.get('/', (req, res) => {
-  res.send('MyTaxi Backend is running! Try /rides or /users');
+    res.send('MyTaxi Backend is running! Try /rides or /users');
 });
 
-const PORT = process.env.PORT || 3000; // Azure uses env.PORT
-app.listen(PORT, () => console.log(`Running on ${PORT}`));
+app.get('/dashboard', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/dashboard.html'));
+});
 
 // Middleware for JWT authentication
 const authenticate = (req, res, next) => {
@@ -55,7 +96,7 @@ const authenticate = (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded; // Attach decoded user info (userId, role)
+        req.user = decoded;
         next();
     } catch (err) {
         console.error("JWT authentication failed:", err.message);
@@ -279,48 +320,84 @@ app.delete('/drivers/:id', authenticate, authorize(['admin']), async (req, res) 
 app.post('/users/register', async (req, res) => {
     try {
         if (!db) throw new Error("Database not connected");
+        
         const { name, age, email, password, role, isAdmin } = req.body;
         if (!name || !age || !email || !password || typeof isAdmin !== 'boolean') {
             return res.status(400).json({ error: "Missing required fields or invalid 'isAdmin' type" });
         }
 
+        // Check if user exists
         const existingUser = await db.collection('users').findOne({ email });
-        if (existingUser) return res.status(409).json({ error: "User with this email already exists" });
-
-        const hashedPassword = await bcrypt.hash(password, saltRounds);
-        let userRole = 'user';
-        if (isAdmin) {
-            userRole = 'admin';
-        } else if (role && typeof role === 'string') {
-            userRole = role;
+        if (existingUser) {
+            return res.status(409).json({ error: "User with this email already exists" });
         }
 
-        const user = { name, age, email, password: hashedPassword, role: userRole, isAdmin };
-        await db.collection('users').insertOne(user);
-        res.status(201).json({ message: "User created successfully" });
+        // Hash password and determine role
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+        let userRole = isAdmin ? 'admin' : (role || 'user');
+
+        // Create user
+        const user = { 
+            name, 
+            age, 
+            email, 
+            password: hashedPassword, 
+            role: userRole, 
+            isAdmin,
+            createdAt: new Date()
+        };
+
+        const result = await db.collection('users').insertOne(user);
+        
+        // Generate token
+        const token = jwt.sign(
+            { userId: result.insertedId, role: userRole },
+            process.env.JWT_SECRET,
+            { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
+        );
+
+        res.status(201).json({ 
+            message: "User created successfully",
+            token,
+            userId: result.insertedId
+        });
     } catch (err) {
         console.error("Registration error:", err);
         res.status(500).json({ error: "Registration failed" });
     }
 });
 
-// POST /users/login - User login
 app.post('/users/login', async (req, res) => {
-    const { email, password } = req.body;
     try {
+        if (!db) throw new Error("Database not connected");
+        
+        const { email, password } = req.body;
+        if (!email || !password) {
+            return res.status(400).json({ error: "Email and password are required" });
+        }
+
         const user = await db.collection('users').findOne({ email });
-        if (!user || !(await bcrypt.compare(password, user.password))) {
+        if (!user) {
             return res.status(401).json({ error: "Invalid credentials" });
         }
 
-        const tokenRole = user.isAdmin ? 'admin' : user.role;
+        const passwordMatch = await bcrypt.compare(password, user.password);
+        if (!passwordMatch) {
+            return res.status(401).json({ error: "Invalid credentials" });
+        }
+
         const token = jwt.sign(
-            { userId: user._id, role: tokenRole },
+            { userId: user._id, role: user.role },
             process.env.JWT_SECRET,
             { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
         );
 
-        res.status(200).json({ token, role: tokenRole, message: "Login successful" });
+        res.status(200).json({ 
+            token, 
+            role: user.role,
+            userId: user._id,
+            message: "Login successful"
+        });
     } catch (err) {
         console.error("Login error:", err);
         res.status(500).json({ error: "Login failed" });
