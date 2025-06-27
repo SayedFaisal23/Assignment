@@ -456,10 +456,10 @@ app.get('/analytics/passengers', async (req, res) => {
 
 app.get('/test-connection', async (req, res) => {
   try {
+    if (!db) throw new Error("Database not initialized");
     await db.command({ ping: 1 });
-    res.send("Database connected successfully!");
+    res.json({ status: "OK", message: "Database connected!" });
   } catch (err) {
-    res.status(500).send(`Database connection failed: ${err.message}`);
+    res.status(500).json({ error: err.message });
   }
 });
-
