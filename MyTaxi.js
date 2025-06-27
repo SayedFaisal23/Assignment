@@ -454,3 +454,12 @@ app.get('/analytics/passengers', async (req, res) => {
     }
 });
 
+app.get('/test-connection', async (req, res) => {
+  try {
+    await db.command({ ping: 1 });
+    res.send("Database connected successfully!");
+  } catch (err) {
+    res.status(500).send(`Database connection failed: ${err.message}`);
+  }
+});
+
