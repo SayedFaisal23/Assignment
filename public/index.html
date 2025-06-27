@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyTaxi Frontend</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .card {
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .form-container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .nav-tabs {
+            margin-bottom: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+        .ride-card {
+            transition: all 0.3s;
+        }
+        .ride-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login/Register Section -->
+        <div id="auth-section" class="form-container">
+            <ul class="nav nav-tabs" id="authTabs">
+                <li class="nav-item">
+                    <a class="nav-link active" id="login-tab" data-bs-toggle="tab" href="#login">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="register-tab" data-bs-toggle="tab" href="#register">Register</a>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="login">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Login</h5>
+                            <div id="login-error" class="alert alert-danger hidden"></div>
+                            <form id="login-form">
+                                <div class="mb-3">
+                                    <label for="login-email" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="login-email" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="login-password" class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="login-password" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Login</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="register">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Register</h5>
+                            <div id="register-error" class="alert alert-danger hidden"></div>
+                            <form id="register-form">
+                                <div class="mb-3">
+                                    <label for="register-name" class="form-label">Name</label>
+                                    <input type="text" class="form-control" id="register-name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="register-age" class="form-label">Age</label>
+                                    <input type="number" class="form-control" id="register-age" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="register-email" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="register-email" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="register-password" class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="register-password" required>
+                                </div>
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input" id="register-isAdmin">
+                                    <label class="form-check-label" for="register-isAdmin">Register as Admin</label>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Register</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main App Section (hidden initially) -->
+        <div id="app-section" class="hidden">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+                <div class="container-fluid">
+                    <span class="navbar-brand">MyTaxi</span>
+                    <div class="d-flex">
+                        <span class="navbar-text me-3" id="user-info"></span>
+                        <button class="btn btn-outline-danger" id="logout-btn">Logout</button>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- User Dashboard -->
+            <div id="user-dashboard">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Book a Ride</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="ride-form">
+                                    <div class="mb-3">
+                                        <label for="ride-origin" class="form-label">Origin</label>
+                                        <input type="text" class="form-control" id="ride-origin" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="ride-destination" class="form-label">Destination</label>
+                                        <input type="text" class="form-control" id="ride-destination" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="ride-fare" class="form-label">Fare (USD)</label>
+                                        <input type="number" class="form-control" id="ride-fare" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="ride-distance" class="form-label">Distance (km)</label>
+                                        <input type="number" class="form-control" id="ride-distance" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Book Ride</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Your Rides</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="rides-list"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin/Driver Section -->
+            <div id="admin-section" class="mt-4 hidden">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Driver Management</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="drivers-list"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Configuration
+        const API_BASE_URL = 'https://berr2243-h9dzgpdyb9dcewd5.malaysiawest-01.azurewebsites.net';
+        let currentUser = null;
+
+        // DOM Elements
+        const authSection = document.getElementById('auth-section');
+        const appSection = document.getElementById('app-section');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const loginError = document.getElementById('login-error');
+        const registerError = document.getElementById('register-error');
+        const userInfo = document.getElementById('user-info');
+        const logoutBtn = document.getElementById('logout-btn');
+        const rideForm = document.getElementById('ride-form');
+        const ridesList = document.getElementById('rides-list');
+        const driversList = document.getElementById('drivers-list');
+        const adminSection = document.getElementById('admin-section');
+        const userDashboard = document.getElementById('user-dashboard');
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+            setupEventListeners();
+        });
+
+        // Check if user is already authenticated
+        async function checkAuth() {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/users/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    currentUser = await response.json();
+                    showApp();
+                } else {
+                    localStorage.removeItem('token');
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                localStorage.removeItem('token');
+            }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Login form
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+
+                try {
+                    const response = await fetch(`${API_BASE_URL}/users/login`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ email, password })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        localStorage.setItem('token', data.token);
+                        currentUser = { email, role: data.role };
+                        showApp();
+                    } else {
+                        const error = await response.json();
+                        showError(loginError, error.error || 'Login failed');
+                    }
+                } catch (error) {
+                    showError(loginError, 'Network error. Please try again.');
+                }
+            });
+
+            // Register form
+            registerForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const name = document.getElementById('register-name').value;
+                const age = document.getElementById('register-age').value;
+                const email = document.getElementById('register-email').value;
+                const password = document.getElementById('register-password').value;
+                const isAdmin = document.getElementById('register-isAdmin').checked;
+
+                try {
+                    const response = await fetch(`${API_BASE_URL}/users/register`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ name, age, email, password, isAdmin })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        localStorage.setItem('token', data.token);
+                        currentUser = { email, role: data.role };
+                        showApp();
+                    } else {
+                        const error = await response.json();
+                        showError(registerError, error.error || 'Registration failed');
+                    }
+                } catch (error) {
+                    showError(registerError, 'Network error. Please try again.');
+                }
+            });
+
+            // Logout button
+            logoutBtn.addEventListener('click', () => {
+                localStorage.removeItem('token');
+                currentUser = null;
+                hideApp();
+            });
+
+            // Ride form
+            rideForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const origin = document.getElementById('ride-origin').value;
+                const destination = document.getElementById('ride-destination').value;
+                const fare = document.getElementById('ride-fare').value;
+                const distance = document.getElementById('ride-distance').value;
+
+                try {
+                    const response = await fetch(`${API_BASE_URL}/rides`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        },
+                        body: JSON.stringify({
+                            origin,
+                            destination,
+                            fare,
+                            distance,
+                            passengerId: currentUser._id,
+                            status: 'pending'
+                        })
+                    });
+
+                    if (response.ok) {
+                        const ride = await response.json();
+                        addRideToUI(ride);
+                        rideForm.reset();
+                    } else {
+                        const error = await response.json();
+                        alert(`Failed to book ride: ${error.error}`);
+                    }
+                } catch (error) {
+                    alert('Network error. Please try again.');
+                }
+            });
+        }
+
+        // Show the main app interface
+        async function showApp() {
+            authSection.classList.add('hidden');
+            appSection.classList.remove('hidden');
+            userInfo.textContent = `Welcome, ${currentUser.email} (${currentUser.role})`;
+
+            if (currentUser.role === 'admin' || currentUser.role === 'driver') {
+                adminSection.classList.remove('hidden');
+                loadDrivers();
+            } else {
+                adminSection.classList.add('hidden');
+            }
+
+            loadRides();
+        }
+
+        // Hide the main app interface
+        function hideApp() {
+            authSection.classList.remove('hidden');
+            appSection.classList.add('hidden');
+            loginForm.reset();
+            registerForm.reset();
+            ridesList.innerHTML = '';
+            driversList.innerHTML = '';
+        }
+
+        // Load user's rides
+        async function loadRides() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/rides`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                if (response.ok) {
+                    const rides = await response.json();
+                    displayRides(rides);
+                }
+            } catch (error) {
+                console.error('Failed to load rides:', error);
+            }
+        }
+
+        // Display rides in the UI
+        function displayRides(rides) {
+            ridesList.innerHTML = '';
+            
+            if (rides.length === 0) {
+                ridesList.innerHTML = '<p>No rides found.</p>';
+                return;
+            }
+
+            rides.forEach(ride => {
+                if (ride.passengerId === currentUser._id) {
+                    addRideToUI(ride);
+                }
+            });
+        }
+
+        // Add a single ride to the UI
+        function addRideToUI(ride) {
+            const rideElement = document.createElement('div');
+            rideElement.className = 'card ride-card mb-2';
+            rideElement.innerHTML = `
+                <div class="card-body">
+                    <h6 class="card-title">${ride.origin} → ${ride.destination}</h6>
+                    <p class="card-text">
+                        Fare: $${ride.fare} | Distance: ${ride.distance} km<br>
+                        Status: ${ride.status}
+                    </p>
+                </div>
+            `;
+            ridesList.prepend(rideElement);
+        }
+
+        // Load drivers (for admin/driver)
+        async function loadDrivers() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/drivers`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                if (response.ok) {
+                    const drivers = await response.json();
+                    displayDrivers(drivers);
+                }
+            } catch (error) {
+                console.error('Failed to load drivers:', error);
+            }
+        }
+
+        // Display drivers in the UI
+        function displayDrivers(drivers) {
+            driversList.innerHTML = '';
+            
+            if (drivers.length === 0) {
+                driversList.innerHTML = '<p>No drivers found.</p>';
+                return;
+            }
+
+            drivers.forEach(driver => {
+                const driverElement = document.createElement('div');
+                driverElement.className = 'card ride-card mb-2';
+                driverElement.innerHTML = `
+                    <div class="card-body">
+                        <h6 class="card-title">${driver.name}</h6>
+                        <p class="card-text">
+                            Vehicle: ${driver.vehicle}<br>
+                            Rating: ${driver.rating} | Available: ${driver.isAvailable ? 'Yes' : 'No'}
+                        </p>
+                        ${currentUser.role === 'admin' ? `
+                        <button class="btn btn-sm btn-danger delete-driver" data-id="${driver._id}">Delete</button>
+                        ` : ''}
+                    </div>
+                `;
+                driversList.appendChild(driverElement);
+            });
+
+            // Add event listeners to delete buttons
+            document.querySelectorAll('.delete-driver').forEach(button => {
+                button.addEventListener('click', async (e) => {
+                    const driverId = e.target.getAttribute('data-id');
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/drivers/${driverId}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                            }
+                        });
+
+                        if (response.ok) {
+                            loadDrivers();
+                        } else {
+                            const error = await response.json();
+                            alert(`Failed to delete driver: ${error.error}`);
+                        }
+                    } catch (error) {
+                        alert('Network error. Please try again.');
+                    }
+                });
+            });
+        }
+
+        // Show error message
+        function showError(element, message) {
+            element.textContent = message;
+            element.classList.remove('hidden');
+            setTimeout(() => {
+                element.classList.add('hidden');
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

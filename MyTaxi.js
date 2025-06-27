@@ -38,6 +38,10 @@ app.get('/dashboard', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/dashboard.html'));
 });
 
+app.get('/', (req, res) => {
+  res.send('MyTaxi Backend is running! Try /rides or /users');
+});
+
 const PORT = process.env.PORT || 3000; // Azure uses env.PORT
 app.listen(PORT, () => console.log(`Running on ${PORT}`));
 
