@@ -38,9 +38,8 @@ app.get('/dashboard', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/dashboard.html'));
 });
 
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-});
+const PORT = process.env.PORT || 3000; // Azure uses env.PORT
+app.listen(PORT, () => console.log(`Running on ${PORT}`));
 
 // Middleware for JWT authentication
 const authenticate = (req, res, next) => {
