@@ -2,183 +2,185 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>MyTaxi Platform</title>
+  <title>MyTaxi App</title>
   <style>
-    body { font-family: Arial; margin: 20px; background: #f9f9f9; }
-    section { margin-bottom: 2rem; padding: 1rem; background: white; border: 1px solid #ccc; border-radius: 6px; }
-    input, button { display: block; margin-top: 8px; padding: 8px; width: 100%; max-width: 300px; }
+    body { font-family: Arial; margin: 2rem; background: #f9f9f9; }
+    section { display: none; padding: 1rem; background: #fff; margin-bottom: 2rem; border-radius: 8px; box-shadow: 0 0 8px rgba(0,0,0,0.1); }
+    input, button { display: block; margin: 8px 0; padding: 8px; width: 100%; max-width: 300px; }
     h2 { margin-top: 0; }
-    ul { padding-left: 1rem; }
-    li { margin: 5px 0; }
   </style>
 </head>
 <body>
 
-  <section id="register">
-    <h2>Register</h2>
+<!-- LOGIN / REGISTER SECTION -->
+<section id="auth-section" style="display: block;">
+  <h2>Welcome to MyTaxi</h2>
+
+  <div>
+    <h3>Login</h3>
+    <input id="loginEmail" type="email" placeholder="Email" />
+    <input id="loginPassword" type="password" placeholder="Password" />
+    <button onclick="login()">Login</button>
+  </div>
+
+  <hr>
+
+  <div>
+    <h3>Register</h3>
     <input id="regName" placeholder="Name" />
     <input id="regAge" type="number" placeholder="Age" />
     <input id="regEmail" type="email" placeholder="Email" />
     <input id="regPassword" type="password" placeholder="Password" />
-    <label><input type="checkbox" id="regAdmin" /> Admin Account</label>
+    <label><input type="checkbox" id="regAdmin" /> Admin</label>
     <button onclick="register()">Register</button>
-  </section>
+  </div>
+</section>
 
-  <section id="login">
-    <h2>Login</h2>
-    <input id="loginEmail" type="email" placeholder="Email" />
-    <input id="loginPassword" type="password" placeholder="Password" />
-    <button onclick="login()">Login</button>
-  </section>
+<!-- USER DASHBOARD -->
+<section id="user-dashboard">
+  <h2>User Dashboard</h2>
+  <button onclick="loadRides()">Load Available Rides</button>
+  <ul id="userRideList"></ul>
+  <button onclick="logout()">Logout</button>
+</section>
 
-  <section id="rides">
-    <h2>Book a Ride</h2>
-    <input id="rideOrigin" placeholder="Origin" />
-    <input id="rideDest" placeholder="Destination" />
-    <input id="rideFare" type="number" placeholder="Fare" />
-    <input id="ridePassengerId" placeholder="Passenger ID" />
-    <input id="rideStatus" placeholder="Status" />
-    <input id="rideDistance" type="number" placeholder="Distance (km)" />
-    <button onclick="bookRide()">Book Ride</button>
+<!-- DRIVER DASHBOARD -->
+<section id="driver-dashboard">
+  <h2>Driver Dashboard</h2>
+  <button onclick="loadDrivers()">View All Drivers</button>
+  <ul id="driverList"></ul>
+  <button onclick="logout()">Logout</button>
+</section>
 
-    <h3>All Rides</h3>
-    <button onclick="loadRides()">Load Rides</button>
-    <ul id="rideList"></ul>
-  </section>
+<!-- ADMIN DASHBOARD -->
+<section id="admin-dashboard">
+  <h2>Admin Dashboard</h2>
+  <button onclick="loadUsers()">Manage Users</button>
+  <ul id="adminUserList"></ul>
 
-  <section id="drivers">
-    <h2>Manage Drivers</h2>
-    <button onclick="loadDrivers()">Load Drivers</button>
-    <ul id="driverList"></ul>
-  </section>
+  <button onclick="loadDrivers()">Manage Drivers</button>
+  <ul id="adminDriverList"></ul>
 
-  <section id="admin">
-    <h2>Admin: View All Users</h2>
-    <button onclick="loadUsers()">Get Users</button>
-    <ul id="userList"></ul>
-  </section>
+  <button onclick="loadAnalytics()">View Analytics</button>
+  <ul id="analyticsList"></ul>
 
-  <section id="analytics">
-    <h2>Analytics</h2>
-    <button onclick="loadAnalytics()">Get Passenger Metrics</button>
-    <ul id="analyticsList"></ul>
-  </section>
+  <button onclick="logout()">Logout</button>
+</section>
 
 <script>
-  let token = null;
-  let currentUserId = null;
+let token = null;
+let role = null;
 
-  async function register() {
-    const body = {
-      name: document.getElementById("regName").value,
-      age: parseInt(document.getElementById("regAge").value),
-      email: document.getElementById("regEmail").value,
-      password: document.getElementById("regPassword").value,
-      isAdmin: document.getElementById("regAdmin").checked
-    };
+function showSection(sectionId) {
+  document.querySelectorAll('section').forEach(sec => sec.style.display = 'none');
+  document.getElementById(sectionId).style.display = 'block';
+}
 
-    const res = await fetch('/users/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-    const data = await res.json();
-    alert(data.message || data.error);
-  }
+async function register() {
+  const user = {
+    name: document.getElementById("regName").value,
+    age: parseInt(document.getElementById("regAge").value),
+    email: document.getElementById("regEmail").value,
+    password: document.getElementById("regPassword").value,
+    isAdmin: document.getElementById("regAdmin").checked
+  };
 
-  async function login() {
-    const body = {
+  const res = await fetch("/users/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(user)
+  });
+
+  const data = await res.json();
+  alert(data.message || data.error);
+}
+
+async function login() {
+  const res = await fetch("/users/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
       email: document.getElementById("loginEmail").value,
       password: document.getElementById("loginPassword").value
-    };
+    })
+  });
 
-    const res = await fetch('/users/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-    const data = await res.json();
-    if (data.token) {
-      token = data.token;
-      currentUserId = data.userId;
-      alert("Login successful");
-    } else {
-      alert(data.error);
-    }
+  const data = await res.json();
+  if (data.token) {
+    token = data.token;
+    role = data.role;
+
+    if (role === 'admin') showSection('admin-dashboard');
+    else if (role === 'driver') showSection('driver-dashboard');
+    else showSection('user-dashboard');
+  } else {
+    alert(data.error);
   }
+}
 
-  async function bookRide() {
-    const body = {
-      origin: document.getElementById("rideOrigin").value,
-      destination: document.getElementById("rideDest").value,
-      fare: parseFloat(document.getElementById("rideFare").value),
-      passengerId: document.getElementById("ridePassengerId").value,
-      status: document.getElementById("rideStatus").value,
-      distance: parseFloat(document.getElementById("rideDistance").value)
-    };
+function logout() {
+  token = null;
+  role = null;
+  showSection('auth-section');
+}
 
-    const res = await fetch('/rides', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify(body)
-    });
+// USER Functions
+async function loadRides() {
+  const res = await fetch("/rides");
+  const rides = await res.json();
+  const list = document.getElementById("userRideList");
+  list.innerHTML = '';
+  rides.forEach(ride => {
+    const li = document.createElement("li");
+    li.textContent = `${ride.origin} → ${ride.destination} - RM${ride.fare}`;
+    list.appendChild(li);
+  });
+}
 
-    const data = await res.json();
-    alert(data.message || data.error);
-  }
+// ADMIN Functions
+async function loadUsers() {
+  const res = await fetch("/admin/users", {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  const users = await res.json();
+  const list = document.getElementById("adminUserList");
+  list.innerHTML = '';
+  users.forEach(u => {
+    const li = document.createElement("li");
+    li.textContent = `${u.name} (${u.email}) - Role: ${u.role}`;
+    list.appendChild(li);
+  });
+}
 
-  async function loadRides() {
-    const res = await fetch('/rides');
-    const rides = await res.json();
-    const list = document.getElementById("rideList");
-    list.innerHTML = '';
-    rides.forEach(r => {
-      const li = document.createElement("li");
-      li.textContent = `${r.origin} → ${r.destination} - RM${r.fare}`;
-      list.appendChild(li);
-    });
-  }
+async function loadAnalytics() {
+  const res = await fetch("/analytics/passengers");
+  const stats = await res.json();
+  const list = document.getElementById("analyticsList");
+  list.innerHTML = '';
+  stats.forEach(p => {
+    const li = document.createElement("li");
+    li.textContent = `${p.name}: ${p.totalRides} rides, RM${p.totalFare}, Avg Distance: ${p.avgDistance.toFixed(2)} km`;
+    list.appendChild(li);
+  });
+}
 
-  async function loadDrivers() {
-    const res = await fetch('/drivers');
-    const drivers = await res.json();
-    const list = document.getElementById("driverList");
-    list.innerHTML = '';
-    drivers.forEach(d => {
-      const li = document.createElement("li");
-      li.textContent = `${d.name} (${d.vehicle}) - Rating: ${d.rating || 'N/A'}`;
-      list.appendChild(li);
-    });
-  }
+// Shared (Admin & Driver)
+async function loadDrivers() {
+  const res = await fetch("/drivers");
+  const drivers = await res.json();
+  const adminList = document.getElementById("adminDriverList");
+  const driverList = document.getElementById("driverList");
 
-  async function loadUsers() {
-    const res = await fetch('/admin/users', {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    const users = await res.json();
-    const list = document.getElementById("userList");
-    list.innerHTML = '';
-    users.forEach(u => {
-      const li = document.createElement("li");
-      li.textContent = `${u.name} (${u.email}) - Role: ${u.role}`;
-      list.appendChild(li);
-    });
-  }
+  adminList.innerHTML = '';
+  driverList.innerHTML = '';
 
-  async function loadAnalytics() {
-    const res = await fetch('/analytics/passengers');
-    const stats = await res.json();
-    const list = document.getElementById("analyticsList");
-    list.innerHTML = '';
-    stats.forEach(p => {
-      const li = document.createElement("li");
-      li.textContent = `${p.name}: ${p.totalRides} rides, RM${p.totalFare}, Avg Distance: ${p.avgDistance.toFixed(2)} km`;
-      list.appendChild(li);
-    });
-  }
+  drivers.forEach(d => {
+    const li = document.createElement("li");
+    li.textContent = `${d.name} - ${d.vehicle || 'No vehicle'} - Rating: ${d.rating || 'N/A'}`;
+    if (role === 'admin') adminList.appendChild(li);
+    if (role === 'driver') driverList.appendChild(li);
+  });
+}
 </script>
 
 </body>
