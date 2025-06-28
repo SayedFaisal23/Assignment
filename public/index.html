@@ -2,87 +2,115 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>MyTaxi App</title>
+  <title>MyTaxi Login</title>
   <style>
-    body { font-family: Arial; margin: 2rem; background: #f9f9f9; }
-    section { display: none; padding: 1rem; background: #fff; margin-bottom: 2rem; border-radius: 8px; box-shadow: 0 0 8px rgba(0,0,0,0.1); }
-    input, button { display: block; margin: 8px 0; padding: 8px; width: 100%; max-width: 300px; }
-    h2 { margin-top: 0; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #e9f5ec;
+    }
+    header {
+      background-color: #00b14f;
+      padding: 1rem 2rem;
+      color: white;
+      font-size: 1.5rem;
+    }
+    .container {
+      display: flex;
+      justify-content: space-around;
+      margin: 3rem auto;
+      max-width: 1000px;
+    }
+    .form-box {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 45%;
+    }
+    h2 {
+      color: #007e3a;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      background-color: #00b14f;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background-color: #009e45;
+    }
+    section.dashboard {
+      display: none;
+      padding: 2rem;
+    }
   </style>
 </head>
 <body>
+  <header>MyTaxi Powered by Microsoft Azure</header>
 
-<!-- LOGIN / REGISTER SECTION -->
-<section id="auth-section" style="display: block;">
-  <h2>Welcome to MyTaxi</h2>
+  <div class="container" id="auth-section">
+    <div class="form-box">
+      <h2>Login</h2>
+      <input id="loginEmail" type="email" placeholder="Email">
+      <input id="loginPassword" type="password" placeholder="Password">
+      <button onclick="login()">Login</button>
+    </div>
 
-  <div>
-    <h3>Login</h3>
-    <input id="loginEmail" type="email" placeholder="Email" />
-    <input id="loginPassword" type="password" placeholder="Password" />
-    <button onclick="login()">Login</button>
+    <div class="form-box">
+      <h2>Register</h2>
+      <input id="regName" placeholder="Name">
+      <input id="regEmail" type="email" placeholder="Email">
+      <input id="regPassword" type="password" placeholder="Password">
+      <label><input type="checkbox" id="regAdmin"> Admin</label><br>
+      <label><input type="checkbox" id="regDriver"> Register as Driver</label>
+      <button onclick="register()">Register</button>
+    </div>
   </div>
 
-  <hr>
+  <section id="user-dashboard" class="dashboard">
+    <h2>User Dashboard</h2>
+    <button onclick="logout()">Logout</button>
+    <ul id="userRideList"></ul>
+  </section>
 
-  <div>
-    <h3>Register</h3>
-    <input id="regName" placeholder="Name" />
-    <input id="regAge" type="number" placeholder="Age" />
-    <input id="regEmail" type="email" placeholder="Email" />
-    <input id="regPassword" type="password" placeholder="Password" />
-    <label><input type="checkbox" id="regAdmin" /> Admin</label>
-    <button onclick="register()">Register</button>
-  </div>
-</section>
+  <section id="driver-dashboard" class="dashboard">
+    <h2>Driver Dashboard</h2>
+    <button onclick="logout()">Logout</button>
+    <ul id="driverList"></ul>
+  </section>
 
-<!-- USER DASHBOARD -->
-<section id="user-dashboard">
-  <h2>User Dashboard</h2>
-  <button onclick="loadRides()">Load Available Rides</button>
-  <ul id="userRideList"></ul>
-  <button onclick="logout()">Logout</button>
-</section>
-
-<!-- DRIVER DASHBOARD -->
-<section id="driver-dashboard">
-  <h2>Driver Dashboard</h2>
-  <button onclick="loadDrivers()">View All Drivers</button>
-  <ul id="driverList"></ul>
-  <button onclick="logout()">Logout</button>
-</section>
-
-<!-- ADMIN DASHBOARD -->
-<section id="admin-dashboard">
-  <h2>Admin Dashboard</h2>
-  <button onclick="loadUsers()">Manage Users</button>
-  <ul id="adminUserList"></ul>
-
-  <button onclick="loadDrivers()">Manage Drivers</button>
-  <ul id="adminDriverList"></ul>
-
-  <button onclick="loadAnalytics()">View Analytics</button>
-  <ul id="analyticsList"></ul>
-
-  <button onclick="logout()">Logout</button>
-</section>
+  <section id="admin-dashboard" class="dashboard">
+    <h2>Admin Dashboard</h2>
+    <button onclick="logout()">Logout</button>
+    <ul id="adminUserList"></ul>
+  </section>
 
 <script>
 let token = null;
 let role = null;
 
 function showSection(sectionId) {
-  document.querySelectorAll('section').forEach(sec => sec.style.display = 'none');
+  document.querySelectorAll('.dashboard').forEach(sec => sec.style.display = 'none');
   document.getElementById(sectionId).style.display = 'block';
+  document.getElementById('auth-section').style.display = 'none';
 }
 
 async function register() {
   const user = {
     name: document.getElementById("regName").value,
-    age: parseInt(document.getElementById("regAge").value),
     email: document.getElementById("regEmail").value,
     password: document.getElementById("regPassword").value,
-    isAdmin: document.getElementById("regAdmin").checked
+    isAdmin: document.getElementById("regAdmin").checked,
+    isDriver: document.getElementById("regDriver").checked
   };
 
   const res = await fetch("/users/register", {
@@ -121,67 +149,9 @@ async function login() {
 function logout() {
   token = null;
   role = null;
-  showSection('auth-section');
-}
-
-// USER Functions
-async function loadRides() {
-  const res = await fetch("/rides");
-  const rides = await res.json();
-  const list = document.getElementById("userRideList");
-  list.innerHTML = '';
-  rides.forEach(ride => {
-    const li = document.createElement("li");
-    li.textContent = `${ride.origin} → ${ride.destination} - RM${ride.fare}`;
-    list.appendChild(li);
-  });
-}
-
-// ADMIN Functions
-async function loadUsers() {
-  const res = await fetch("/admin/users", {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  const users = await res.json();
-  const list = document.getElementById("adminUserList");
-  list.innerHTML = '';
-  users.forEach(u => {
-    const li = document.createElement("li");
-    li.textContent = `${u.name} (${u.email}) - Role: ${u.role}`;
-    list.appendChild(li);
-  });
-}
-
-async function loadAnalytics() {
-  const res = await fetch("/analytics/passengers");
-  const stats = await res.json();
-  const list = document.getElementById("analyticsList");
-  list.innerHTML = '';
-  stats.forEach(p => {
-    const li = document.createElement("li");
-    li.textContent = `${p.name}: ${p.totalRides} rides, RM${p.totalFare}, Avg Distance: ${p.avgDistance.toFixed(2)} km`;
-    list.appendChild(li);
-  });
-}
-
-// Shared (Admin & Driver)
-async function loadDrivers() {
-  const res = await fetch("/drivers");
-  const drivers = await res.json();
-  const adminList = document.getElementById("adminDriverList");
-  const driverList = document.getElementById("driverList");
-
-  adminList.innerHTML = '';
-  driverList.innerHTML = '';
-
-  drivers.forEach(d => {
-    const li = document.createElement("li");
-    li.textContent = `${d.name} - ${d.vehicle || 'No vehicle'} - Rating: ${d.rating || 'N/A'}`;
-    if (role === 'admin') adminList.appendChild(li);
-    if (role === 'driver') driverList.appendChild(li);
-  });
+  document.getElementById('auth-section').style.display = 'flex';
+  document.querySelectorAll('.dashboard').forEach(sec => sec.style.display = 'none');
 }
 </script>
-
 </body>
 </html>
