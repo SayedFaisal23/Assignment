@@ -228,7 +228,7 @@ app.get('/drivers/filtered', async (req, res) => {
     try {
         const query = {};
         if (req.query.isAvailable !== undefined) {
-            query.isAvailable = req.query.isAvailable === 'true';
+            query.isAvailable = req.query.isAvailable === true;
         }
         if (req.query.minRating !== undefined) {
             const minRating = parseFloat(req.query.minRating);
