@@ -209,6 +209,8 @@
         <input id="ride-distance" type="number" placeholder="Distance">
         <label>Status</label>
         <input id="ride-status" placeholder="Status" value="pending">
+        <label>Driver</label>
+        <select id="ride-driver"></select>
         <button onclick="createRide()">Submit</button>
         <button onclick="hideCreateRide()" style="background:#fff;color:var(--grab-green);border:1px solid var(--grab-green);">Cancel</button>
         <div id="create-ride-result" class="result"></div>
@@ -253,8 +255,6 @@
       </div>
     </div>
 
-  <!-- Removed duplicate user-section to fix element selection and display issues -->
-
     <div id="analytics-section" class="card hidden">
       <div class="section-title">Analytics</div>
       <button onclick="fetchPassengerAnalytics()">Passenger Analytics</button>
@@ -284,7 +284,6 @@
     function showSection(id) {
       document.getElementById('user-section').classList.add('hidden');
       document.getElementById('drivers-section').classList.add('hidden');
-      document.getElementById('admin-section').classList.add('hidden');
       document.getElementById('analytics-section').classList.add('hidden');
       if (id) document.getElementById(id).classList.remove('hidden');
     }
@@ -323,9 +322,6 @@
           document.getElementById('user-section').classList.remove('hidden');
           document.getElementById('drivers-section').classList.remove('hidden');
           document.getElementById('analytics-section').classList.remove('hidden');
-          if (userRole === 'admin') {
-            document.getElementById('admin-section').classList.remove('hidden');
-          }
           fetchRides();
           fetchDrivers();
         }
@@ -365,42 +361,41 @@
       });
     }
     function showCreateRide() {
-    // Fetch available drivers for selection
-    api('/drivers/filtered?isAvailable=true').then(drivers => {
-      const select = document.getElementById('ride-driver');
-      select.innerHTML = "";
-      drivers.forEach(driver => {
-        const opt = document.createElement('option');
-        opt.value = driver._id;
-        opt.textContent = `${driver.name} (${driver.vehicle})`;
-        select.appendChild(opt);
+      api('/drivers/filtered?isAvailable=true').then(drivers => {
+        const select = document.getElementById('ride-driver');
+        select.innerHTML = "";
+        drivers.forEach(driver => {
+          const opt = document.createElement('option');
+          opt.value = driver._id;
+          opt.textContent = `${driver.name} (${driver.vehicle})`;
+          select.appendChild(opt);
+        });
+        document.getElementById('create-ride-form').classList.remove('hidden');
       });
-      document.getElementById('create-ride-form').classList.remove('hidden');
-    });
-  }
+    }
     function hideCreateRide() {
       document.getElementById('create-ride-form').classList.add('hidden');
     }
     function createRide() {
-    const origin = document.getElementById('ride-origin').value;
-    const destination = document.getElementById('ride-destination').value;
-    const fare = parseFloat(document.getElementById('ride-fare').value);
-    const distance = parseFloat(document.getElementById('ride-distance').value);
-    const status = document.getElementById('ride-status').value;
-    const driverId = document.getElementById('ride-driver').value;
-    api('/rides', {
-      method: 'POST',
-      body: { origin, destination, fare, passengerId: userId, status, distance, driverId }
-    }).then(res => {
-      document.getElementById('create-ride-result').textContent = res.message || "Ride booked!";
-      document.getElementById('create-ride-result').className = "result";
-      fetchRides();
-      hideCreateRide();
-    }).catch(err => {
-      document.getElementById('create-ride-result').textContent = err.error || "Booking failed";
-      document.getElementById('create-ride-result').className = "error";
-    });
-  }
+      const origin = document.getElementById('ride-origin').value;
+      const destination = document.getElementById('ride-destination').value;
+      const fare = parseFloat(document.getElementById('ride-fare').value);
+      const distance = parseFloat(document.getElementById('ride-distance').value);
+      const status = document.getElementById('ride-status').value;
+      const driverId = document.getElementById('ride-driver').value;
+      api('/rides', {
+        method: 'POST',
+        body: { origin, destination, fare, passengerId: userId, status, distance, driverId }
+      }).then(res => {
+        document.getElementById('create-ride-result').textContent = res.message || "Ride booked!";
+        document.getElementById('create-ride-result').className = "result";
+        fetchRides();
+        hideCreateRide();
+      }).catch(err => {
+        document.getElementById('create-ride-result').textContent = err.error || "Booking failed";
+        document.getElementById('create-ride-result').className = "error";
+      });
+    }
 
     function cancelRide(id) {
       api(`/rides/${id}`, { method: 'DELETE' }).then(res => {
@@ -492,64 +487,6 @@
           list.appendChild(li);
         });
         hideFilterDrivers();
-      });
-    }
-
-    // Admin User Management
-    function fetchUsers() {
-      api('/admin/users').then(res => {
-        const list = document.getElementById('users-list');
-        list.innerHTML = "";
-        res.forEach(user => {
-          const li = document.createElement('li');
-          li.innerHTML = `
-            <div>
-              <b>${user.name}</b> (${user.email})<br>
-              Age: ${user.age} | Role: ${user.role} | Admin: ${user.isAdmin ? 'Yes' : 'No'}
-            </div>
-            <div class="actions">
-              <button onclick='showUpdateUser(${JSON.stringify(user)})'>Edit</button>
-              <button onclick="deleteUser('${user._id}')">Delete</button>
-            </div>
-          `;
-          list.appendChild(li);
-        });
-      });
-    }
-    function showUpdateUser(user) {
-      document.getElementById('update-user-id').value = user._id;
-      document.getElementById('update-user-name').value = user.name;
-      document.getElementById('update-user-age').value = user.age;
-      document.getElementById('update-user-email').value = user.email;
-      document.getElementById('update-user-isadmin').checked = user.isAdmin;
-      document.getElementById('update-user-form').classList.remove('hidden');
-    }
-    function hideUpdateUser() {
-      document.getElementById('update-user-form').classList.add('hidden');
-    }
-    function updateUser() {
-      const id = document.getElementById('update-user-id').value;
-      const name = document.getElementById('update-user-name').value;
-      const age = parseInt(document.getElementById('update-user-age').value, 10);
-      const email = document.getElementById('update-user-email').value;
-      const isAdmin = document.getElementById('update-user-isadmin').checked;
-      api(`/admin/users/${id}`, {
-        method: 'PATCH',
-        body: { name, age, email, isAdmin }
-      }).then(res => {
-        document.getElementById('update-user-result').textContent = res.message || "User updated!";
-        document.getElementById('update-user-result').className = "result";
-        fetchUsers();
-        hideUpdateUser();
-      }).catch(err => {
-        document.getElementById('update-user-result').textContent = err.error || "Update failed";
-        document.getElementById('update-user-result').className = "error";
-      });
-    }
-    function deleteUser(id) {
-      if (!confirm("Delete this user?")) return;
-      api(`/admin/users/${id}`, { method: 'DELETE' }).then(res => {
-        fetchUsers();
       });
     }
 
