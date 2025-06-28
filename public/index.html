@@ -385,27 +385,27 @@
           list.appendChild(li);
         });
       });
+    };
+function showCreateRide() {
+  api('/drivers/filtered?isAvailable=true').then(drivers => {
+    const select = document.getElementById('ride-driver');
+    select.innerHTML = "";
+    if (drivers.length === 0) {
+      const opt = document.createElement('option');
+      opt.value = "";
+      opt.textContent = "No available drivers";
+      select.appendChild(opt);
+      select.disabled = true;
+    } else {
+      select.disabled = false;
+      drivers.forEach(driver => {
+        const opt = document.createElement('option');
+        opt.value = driver._id;
+        opt.textContent = `${driver.name} (${driver.vehicle})`;
+        select.appendChild(opt);
+      });
     }
-    function showCreateRide() {
-      api('/drivers/filtered?isAvailable=true').then(drivers => {
-        const select = document.getElementById('ride-driver');
-        select.innerHTML = "";
-        if (drivers.length === 0) {
-          const opt = document.createElement('option');
-          opt.value = "";
-          opt.textContent = "No available drivers";
-          select.appendChild(opt);
-          select.disabled = true;
-      } else {
-          select.disabled = false;
-          drivers.forEach(driver => {
-            const opt = document.createElement('option');
-            opt.value = driver._id;
-            opt.textContent = `${driver.name} (${driver.vehicle})`;
-            select.appendChild(opt);
-          });
-       }
-      document.getElementById('create-ride-form').classList.remove('hidden');
+    document.getElementById('create-ride-form').classList.remove('hidden');
   }).catch(() => {
     // fallback: show form even if fetch fails
     document.getElementById('create-ride-form').classList.remove('hidden');
