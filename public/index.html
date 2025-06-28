@@ -253,28 +253,7 @@
       </div>
     </div>
 
-    <div id="admin-section" class="card hidden">
-      <div class="section-title">Admin User Management</div>
-      <button onclick="fetchUsers()">Refresh Users</button>
-      <ul id="users-list" class="list"></ul>
-      <div id="update-user-form" class="hidden">
-        <h3 style="margin:0.5em 0;">Update User</h3>
-        <label>User ID</label>
-        <input id="update-user-id" readonly>
-        <label>Name</label>
-        <input id="update-user-name">
-        <label>Age</label>
-        <input id="update-user-age" type="number">
-        <label>Email</label>
-        <input id="update-user-email">
-        <label>
-          <input id="update-user-isadmin" type="checkbox" style="width:auto;display:inline;"> Is Admin
-        </label>
-        <button onclick="updateUser()">Update</button>
-        <button onclick="hideUpdateUser()" style="background:#fff;color:var(--grab-green);border:1px solid var(--grab-green);">Cancel</button>
-        <div id="update-user-result" class="result"></div>
-      </div>
-    </div>
+  <!-- Removed duplicate user-section to fix element selection and display issues -->
 
     <div id="analytics-section" class="card hidden">
       <div class="section-title">Analytics</div>
@@ -386,30 +365,43 @@
       });
     }
     function showCreateRide() {
+    // Fetch available drivers for selection
+    api('/drivers/filtered?isAvailable=true').then(drivers => {
+      const select = document.getElementById('ride-driver');
+      select.innerHTML = "";
+      drivers.forEach(driver => {
+        const opt = document.createElement('option');
+        opt.value = driver._id;
+        opt.textContent = `${driver.name} (${driver.vehicle})`;
+        select.appendChild(opt);
+      });
       document.getElementById('create-ride-form').classList.remove('hidden');
-    }
+    });
+  }
     function hideCreateRide() {
       document.getElementById('create-ride-form').classList.add('hidden');
     }
     function createRide() {
-      const origin = document.getElementById('ride-origin').value;
-      const destination = document.getElementById('ride-destination').value;
-      const fare = parseFloat(document.getElementById('ride-fare').value);
-      const distance = parseFloat(document.getElementById('ride-distance').value);
-      const status = document.getElementById('ride-status').value;
-      api('/rides', {
-        method: 'POST',
-        body: { origin, destination, fare, passengerId: userId, status, distance }
-      }).then(res => {
-        document.getElementById('create-ride-result').textContent = res.message || "Ride booked!";
-        document.getElementById('create-ride-result').className = "result";
-        fetchRides();
-        hideCreateRide();
-      }).catch(err => {
-        document.getElementById('create-ride-result').textContent = err.error || "Booking failed";
-        document.getElementById('create-ride-result').className = "error";
-      });
-    }
+    const origin = document.getElementById('ride-origin').value;
+    const destination = document.getElementById('ride-destination').value;
+    const fare = parseFloat(document.getElementById('ride-fare').value);
+    const distance = parseFloat(document.getElementById('ride-distance').value);
+    const status = document.getElementById('ride-status').value;
+    const driverId = document.getElementById('ride-driver').value;
+    api('/rides', {
+      method: 'POST',
+      body: { origin, destination, fare, passengerId: userId, status, distance, driverId }
+    }).then(res => {
+      document.getElementById('create-ride-result').textContent = res.message || "Ride booked!";
+      document.getElementById('create-ride-result').className = "result";
+      fetchRides();
+      hideCreateRide();
+    }).catch(err => {
+      document.getElementById('create-ride-result').textContent = err.error || "Booking failed";
+      document.getElementById('create-ride-result').className = "error";
+    });
+  }
+
     function cancelRide(id) {
       api(`/rides/${id}`, { method: 'DELETE' }).then(res => {
         fetchRides();

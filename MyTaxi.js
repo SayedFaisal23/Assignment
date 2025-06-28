@@ -149,15 +149,26 @@ app.get('/rides/:id', async (req, res) => {
     }
 });
 
-// POST /rides - Create a new ride
+// POST /rides - Create a new ride (now supports driverId)
 app.post('/rides', authenticate, authorize(['user', 'admin']), async (req, res) => {
     try {
-        const { origin, destination, fare, passengerId, status, distance } = req.body;
-        if (!origin || !destination || !fare || !passengerId || !status || distance === undefined) {
+        const { origin, destination, fare, passengerId, status, distance, driverId } = req.body;
+        if (!origin || !destination || !fare || !passengerId || !status || distance === undefined || !driverId) {
             return res.status(400).json({ error: "Missing required ride fields" });
         }
+        const driverObjId = isValidObjectId(driverId);
+        if (!driverObjId) return res.status(400).json({ error: "Invalid driverId" });
 
-        const result = await db.collection('rides').insertOne(req.body);
+        // Optionally: check if driver exists and is available
+        const driver = await db.collection('drivers').findOne({ _id: driverObjId, isAvailable: true });
+        if (!driver) return res.status(400).json({ error: "Driver not available" });
+
+        const ride = { origin, destination, fare, passengerId, status, distance, driverId: driverObjId };
+        const result = await db.collection('rides').insertOne(ride);
+
+        // Optionally: set driver as unavailable
+        await db.collection('drivers').updateOne({ _id: driverObjId }, { $set: { isAvailable: false } });
+
         res.status(201).json({ id: result.insertedId, message: "Ride created" });
     } catch (err) {
         console.error("Error creating ride:", err);
