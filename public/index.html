@@ -1,157 +1,583 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>MyTaxi Login</title>
+  <meta charset="UTF-8">
+  <title>MyTaxi (Grab Style)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
+    :root {
+      --grab-green: #00b14f;
+      --grab-dark: #00703c;
+      --grab-light: #e8f5e9;
+      --card-radius: 18px;
+      --shadow: 0 2px 8px rgba(0,0,0,0.07);
+    }
     body {
+      background: var(--grab-light);
+      font-family: 'Segoe UI', Arial, sans-serif;
       margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: #e9f5ec;
+      padding: 0;
+      color: #222;
     }
     header {
-      background-color: #00b14f;
-      padding: 1rem 2rem;
-      color: white;
-      font-size: 1.5rem;
+      background: var(--grab-green);
+      color: #fff;
+      padding: 1.5em 1em 1em 1em;
+      border-bottom-left-radius: var(--card-radius);
+      border-bottom-right-radius: var(--card-radius);
+      box-shadow: var(--shadow);
+      text-align: center;
     }
-    .container {
-      display: flex;
-      justify-content: space-around;
-      margin: 3rem auto;
-      max-width: 1000px;
-    }
-    .form-box {
-      background: white;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      width: 45%;
+    h1 {
+      margin: 0 0 0.2em 0;
+      font-size: 2.2em;
+      letter-spacing: 1px;
     }
     h2 {
-      color: #007e3a;
+      color: var(--grab-dark);
+      margin-top: 0;
     }
-    input, button {
+    .container {
+      max-width: 900px;
+      margin: 2em auto;
+      padding: 0 1em;
+    }
+    .card {
+      background: #fff;
+      border-radius: var(--card-radius);
+      box-shadow: var(--shadow);
+      padding: 1.5em 1.2em 1.2em 1.2em;
+      margin-bottom: 1.5em;
+      transition: box-shadow 0.2s;
+    }
+    .card:hover {
+      box-shadow: 0 4px 16px rgba(0,177,79,0.10);
+    }
+    .flex-row {
+      display: flex;
+      gap: 1em;
+      flex-wrap: wrap;
+    }
+    .flex-col {
+      flex: 1 1 250px;
+      min-width: 250px;
+    }
+    label {
+      display: block;
+      margin: 0.7em 0 0.2em 0;
+      font-weight: 500;
+    }
+    input, select {
       width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
+      padding: 0.6em;
+      border: 1px solid #c8e6c9;
+      border-radius: 8px;
+      margin-bottom: 0.5em;
+      font-size: 1em;
+      background: #f8fff8;
+      transition: border 0.2s;
+    }
+    input:focus, select:focus {
+      border: 1.5px solid var(--grab-green);
+      outline: none;
     }
     button {
-      background-color: #00b14f;
-      color: white;
+      background: var(--grab-green);
+      color: #fff;
       border: none;
+      border-radius: 8px;
+      padding: 0.7em 1.5em;
+      font-size: 1em;
+      font-weight: 600;
+      margin: 0.3em 0.5em 0.3em 0;
       cursor: pointer;
-      transition: background 0.3s ease;
+      transition: background 0.2s;
+      box-shadow: 0 2px 6px rgba(0,177,79,0.08);
     }
-    button:hover {
-      background-color: #009e45;
+    button:hover, button:focus {
+      background: var(--grab-dark);
     }
-    section.dashboard {
-      display: none;
-      padding: 2rem;
+    .hidden { display: none !important; }
+    .result, .error {
+      margin-top: 0.5em;
+      font-size: 0.98em;
+      padding: 0.5em 0.8em;
+      border-radius: 8px;
+      background: #f1f8e9;
+      color: #2e7d32;
+      word-break: break-all;
+    }
+    .error {
+      background: #ffebee;
+      color: #c62828;
+    }
+    .list {
+      margin: 0.5em 0 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    .list li {
+      background: #f8fff8;
+      border-radius: 10px;
+      margin-bottom: 0.5em;
+      padding: 0.8em 1em;
+      box-shadow: 0 1px 3px rgba(0,177,79,0.04);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .list .actions button {
+      background: #fff;
+      color: var(--grab-green);
+      border: 1px solid var(--grab-green);
+      margin: 0 0.2em;
+      padding: 0.3em 0.8em;
+      font-size: 0.95em;
+      border-radius: 6px;
+      box-shadow: none;
+    }
+    .list .actions button:hover {
+      background: var(--grab-green);
+      color: #fff;
+    }
+    .section-title {
+      font-size: 1.2em;
+      font-weight: 600;
+      margin-bottom: 0.7em;
+      color: var(--grab-dark);
+    }
+    @media (max-width: 700px) {
+      .flex-row { flex-direction: column; }
+      .container { padding: 0 0.2em; }
     }
   </style>
 </head>
 <body>
-  <header>MyTaxi Powered by Microsoft Azure</header>
+  <header>
+    <h1>MyTaxi</h1>
+    <div style="font-size:1.1em;opacity:0.85;">Your ride, Grab style.</div>
+  </header>
+  <div class="container">
 
-  <div class="container" id="auth-section">
-    <div class="form-box">
-      <h2>Login</h2>
-      <input id="loginEmail" type="email" placeholder="Email">
-      <input id="loginPassword" type="password" placeholder="Password">
-      <button onclick="login()">Login</button>
+    <div class="flex-row">
+      <div class="flex-col">
+        <div class="card">
+          <div class="section-title">Register</div>
+          <label>Name</label>
+          <input id="reg-name" placeholder="Name">
+          <label>Age</label>
+          <input id="reg-age" type="number" placeholder="Age">
+          <label>Email</label>
+          <input id="reg-email" placeholder="Email">
+          <label>Password</label>
+          <input id="reg-password" type="password" placeholder="Password">
+          <label>
+            <input id="reg-isadmin" type="checkbox" style="width:auto;display:inline;"> Register as Admin
+          </label>
+          <button onclick="register()">Register</button>
+          <div id="register-result" class="result"></div>
+        </div>
+      </div>
+      <div class="flex-col">
+        <div class="card">
+          <div class="section-title">Login</div>
+          <label>Email</label>
+          <input id="login-email" placeholder="Email">
+          <label>Password</label>
+          <input id="login-password" type="password" placeholder="Password">
+          <button onclick="login()">Login</button>
+          <button onclick="logout()" style="background:#fff;color:var(--grab-green);border:1px solid var(--grab-green);">Logout</button>
+          <div id="login-result" class="result"></div>
+        </div>
+      </div>
     </div>
 
-    <div class="form-box">
-      <h2>Register</h2>
-      <input id="regName" placeholder="Name">
-      <input id="regEmail" type="email" placeholder="Email">
-      <input id="regPassword" type="password" placeholder="Password">
-      <label><input type="checkbox" id="regAdmin"> Admin</label><br>
-      <label><input type="checkbox" id="regDriver"> Register as Driver</label>
-      <button onclick="register()">Register</button>
+    <div id="user-section" class="card hidden">
+      <div class="section-title">Rides</div>
+      <button onclick="fetchRides()">Refresh Rides</button>
+      <button onclick="showCreateRide()">Book Ride</button>
+      <ul id="rides-list" class="list"></ul>
+      <div id="create-ride-form" class="hidden">
+        <h3 style="margin:0.5em 0;">Book a Ride</h3>
+        <label>Origin</label>
+        <input id="ride-origin" placeholder="Origin">
+        <label>Destination</label>
+        <input id="ride-destination" placeholder="Destination">
+        <label>Fare</label>
+        <input id="ride-fare" type="number" placeholder="Fare">
+        <label>Distance (km)</label>
+        <input id="ride-distance" type="number" placeholder="Distance">
+        <label>Status</label>
+        <input id="ride-status" placeholder="Status" value="pending">
+        <button onclick="createRide()">Submit</button>
+        <button onclick="hideCreateRide()" style="background:#fff;color:var(--grab-green);border:1px solid var(--grab-green);">Cancel</button>
+        <div id="create-ride-result" class="result"></div>
+      </div>
+    </div>
+
+    <div id="drivers-section" class="card hidden">
+      <div class="section-title">Drivers</div>
+      <button onclick="fetchDrivers()">Refresh Drivers</button>
+      <button onclick="showCreateDriver()">Add Driver (Admin)</button>
+      <button onclick="showFilterDrivers()">Filter</button>
+      <ul id="drivers-list" class="list"></ul>
+      <div id="create-driver-form" class="hidden">
+        <h3 style="margin:0.5em 0;">Add Driver</h3>
+        <label>Name</label>
+        <input id="driver-name" placeholder="Name">
+        <label>Vehicle</label>
+        <input id="driver-vehicle" placeholder="Vehicle">
+        <label>License</label>
+        <input id="driver-license" placeholder="License">
+        <label>Rating</label>
+        <input id="driver-rating" type="number" step="0.1" placeholder="Rating">
+        <label>
+          <input id="driver-isavailable" type="checkbox" style="width:auto;display:inline;"> Is Available
+        </label>
+        <button onclick="createDriver()">Submit</button>
+        <button onclick="hideCreateDriver()" style="background:#fff;color:var(--grab-green);border:1px solid var(--grab-green);">Cancel</button>
+        <div id="create-driver-result" class="result"></div>
+      </div>
+      <div id="filter-driver-form" class="hidden">
+        <h3 style="margin:0.5em 0;">Filter Drivers</h3>
+        <label>Is Available</label>
+        <select id="filter-isavailable">
+          <option value="">Any</option>
+          <option value="true">Yes</option>
+          <option value="false">No</option>
+        </select>
+        <label>Min Rating</label>
+        <input id="filter-minrating" type="number" step="0.1" placeholder="e.g. 4.5">
+        <button onclick="filterDrivers()">Apply</button>
+        <button onclick="hideFilterDrivers()" style="background:#fff;color:var(--grab-green);border:1px solid var(--grab-green);">Cancel</button>
+      </div>
+    </div>
+
+    <div id="admin-section" class="card hidden">
+      <div class="section-title">Admin User Management</div>
+      <button onclick="fetchUsers()">Refresh Users</button>
+      <ul id="users-list" class="list"></ul>
+      <div id="update-user-form" class="hidden">
+        <h3 style="margin:0.5em 0;">Update User</h3>
+        <label>User ID</label>
+        <input id="update-user-id" readonly>
+        <label>Name</label>
+        <input id="update-user-name">
+        <label>Age</label>
+        <input id="update-user-age" type="number">
+        <label>Email</label>
+        <input id="update-user-email">
+        <label>
+          <input id="update-user-isadmin" type="checkbox" style="width:auto;display:inline;"> Is Admin
+        </label>
+        <button onclick="updateUser()">Update</button>
+        <button onclick="hideUpdateUser()" style="background:#fff;color:var(--grab-green);border:1px solid var(--grab-green);">Cancel</button>
+        <div id="update-user-result" class="result"></div>
+      </div>
+    </div>
+
+    <div id="analytics-section" class="card hidden">
+      <div class="section-title">Analytics</div>
+      <button onclick="fetchPassengerAnalytics()">Passenger Analytics</button>
+      <ul id="analytics-list" class="list"></ul>
     </div>
   </div>
+  <script>
+    let token = "";
+    let userRole = "";
+    let userId = "";
 
-  <section id="user-dashboard" class="dashboard">
-    <h2>User Dashboard</h2>
-    <button onclick="logout()">Logout</button>
-    <ul id="userRideList"></ul>
-  </section>
+    function api(path, options = {}) {
+      options.headers = options.headers || {};
+      if (token) options.headers['Authorization'] = 'Bearer ' + token;
+      if (options.body && typeof options.body !== "string") {
+        options.headers['Content-Type'] = 'application/json';
+        options.body = JSON.stringify(options.body);
+      }
+      return fetch(path, options).then(async r => {
+        let data;
+        try { data = await r.json(); } catch { data = {}; }
+        if (!r.ok) throw data;
+        return data;
+      });
+    }
 
-  <section id="driver-dashboard" class="dashboard">
-    <h2>Driver Dashboard</h2>
-    <button onclick="logout()">Logout</button>
-    <ul id="driverList"></ul>
-  </section>
+    function showSection(id) {
+      document.getElementById('user-section').classList.add('hidden');
+      document.getElementById('drivers-section').classList.add('hidden');
+      document.getElementById('admin-section').classList.add('hidden');
+      document.getElementById('analytics-section').classList.add('hidden');
+      if (id) document.getElementById(id).classList.remove('hidden');
+    }
 
-  <section id="admin-dashboard" class="dashboard">
-    <h2>Admin Dashboard</h2>
-    <button onclick="logout()">Logout</button>
-    <ul id="adminUserList"></ul>
-  </section>
+    function register() {
+      const name = document.getElementById('reg-name').value;
+      const age = parseInt(document.getElementById('reg-age').value, 10);
+      const email = document.getElementById('reg-email').value;
+      const password = document.getElementById('reg-password').value;
+      const isAdmin = document.getElementById('reg-isadmin').checked;
+      api('/users/register', {
+        method: 'POST',
+        body: { name, age, email, password, isAdmin }
+      }).then(res => {
+        document.getElementById('register-result').textContent = res.message || "Registered!";
+        document.getElementById('register-result').className = "result";
+      }).catch(err => {
+        document.getElementById('register-result').textContent = err.error || "Registration failed";
+        document.getElementById('register-result').className = "error";
+      });
+    }
 
-<script>
-let token = null;
-let role = null;
+    function login() {
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      api('/users/login', {
+        method: 'POST',
+        body: { email, password }
+      }).then(res => {
+        document.getElementById('login-result').textContent = res.message || "Login successful!";
+        document.getElementById('login-result').className = "result";
+        if (res.token) {
+          token = res.token;
+          userRole = res.role;
+          userId = res.userId;
+          document.getElementById('user-section').classList.remove('hidden');
+          document.getElementById('drivers-section').classList.remove('hidden');
+          document.getElementById('analytics-section').classList.remove('hidden');
+          if (userRole === 'admin') {
+            document.getElementById('admin-section').classList.remove('hidden');
+          }
+          fetchRides();
+          fetchDrivers();
+        }
+      }).catch(err => {
+        document.getElementById('login-result').textContent = err.error || "Login failed";
+        document.getElementById('login-result').className = "error";
+      });
+    }
 
-function showSection(sectionId) {
-  document.querySelectorAll('.dashboard').forEach(sec => sec.style.display = 'none');
-  document.getElementById(sectionId).style.display = 'block';
-  document.getElementById('auth-section').style.display = 'none';
-}
+    function logout() {
+      token = "";
+      userRole = "";
+      userId = "";
+      showSection();
+      document.getElementById('login-result').textContent = "Logged out.";
+      document.getElementById('login-result').className = "result";
+    }
 
-async function register() {
-  const user = {
-    name: document.getElementById("regName").value,
-    email: document.getElementById("regEmail").value,
-    password: document.getElementById("regPassword").value,
-    isAdmin: document.getElementById("regAdmin").checked,
-    isDriver: document.getElementById("regDriver").checked
-  };
+    // Rides
+    function fetchRides() {
+      api('/rides').then(res => {
+        const list = document.getElementById('rides-list');
+        list.innerHTML = "";
+        res.forEach(ride => {
+          const li = document.createElement('li');
+          li.innerHTML = `
+            <div>
+              <b>${ride.origin} → ${ride.destination}</b><br>
+              Fare: $${ride.fare} | Distance: ${ride.distance}km | Status: ${ride.status}
+            </div>
+            <div class="actions">
+              <button onclick="cancelRide('${ride._id}')">Cancel</button>
+            </div>
+          `;
+          list.appendChild(li);
+        });
+      });
+    }
+    function showCreateRide() {
+      document.getElementById('create-ride-form').classList.remove('hidden');
+    }
+    function hideCreateRide() {
+      document.getElementById('create-ride-form').classList.add('hidden');
+    }
+    function createRide() {
+      const origin = document.getElementById('ride-origin').value;
+      const destination = document.getElementById('ride-destination').value;
+      const fare = parseFloat(document.getElementById('ride-fare').value);
+      const distance = parseFloat(document.getElementById('ride-distance').value);
+      const status = document.getElementById('ride-status').value;
+      api('/rides', {
+        method: 'POST',
+        body: { origin, destination, fare, passengerId: userId, status, distance }
+      }).then(res => {
+        document.getElementById('create-ride-result').textContent = res.message || "Ride booked!";
+        document.getElementById('create-ride-result').className = "result";
+        fetchRides();
+        hideCreateRide();
+      }).catch(err => {
+        document.getElementById('create-ride-result').textContent = err.error || "Booking failed";
+        document.getElementById('create-ride-result').className = "error";
+      });
+    }
+    function cancelRide(id) {
+      api(`/rides/${id}`, { method: 'DELETE' }).then(res => {
+        fetchRides();
+      });
+    }
 
-  const res = await fetch("/users/register", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(user)
-  });
+    // Drivers
+    function fetchDrivers() {
+      api('/drivers').then(res => {
+        const list = document.getElementById('drivers-list');
+        list.innerHTML = "";
+        res.forEach(driver => {
+          const li = document.createElement('li');
+          li.innerHTML = `
+            <div>
+              <b>${driver.name}</b> (${driver.vehicle})<br>
+              License: ${driver.license || '-'} | Rating: ${driver.rating || '-'} | Available: ${driver.isAvailable ? 'Yes' : 'No'}
+            </div>
+            <div class="actions">
+              ${userRole === 'admin' ? `<button onclick="deleteDriver('${driver._id}')">Delete</button>` : ''}
+            </div>
+          `;
+          list.appendChild(li);
+        });
+      });
+    }
+    function showCreateDriver() {
+      if (userRole !== 'admin') {
+        alert('Only admin can add drivers.');
+        return;
+      }
+      document.getElementById('create-driver-form').classList.remove('hidden');
+    }
+    function hideCreateDriver() {
+      document.getElementById('create-driver-form').classList.add('hidden');
+    }
+    function createDriver() {
+      const name = document.getElementById('driver-name').value;
+      const vehicle = document.getElementById('driver-vehicle').value;
+      const license = document.getElementById('driver-license').value;
+      const rating = parseFloat(document.getElementById('driver-rating').value);
+      const isAvailable = document.getElementById('driver-isavailable').checked;
+      api('/drivers', {
+        method: 'POST',
+        body: { name, vehicle, license, rating, isAvailable }
+      }).then(res => {
+        document.getElementById('create-driver-result').textContent = res.message || "Driver added!";
+        document.getElementById('create-driver-result').className = "result";
+        fetchDrivers();
+        hideCreateDriver();
+      }).catch(err => {
+        document.getElementById('create-driver-result').textContent = err.error || "Add failed";
+        document.getElementById('create-driver-result').className = "error";
+      });
+    }
+    function deleteDriver(id) {
+      if (!confirm("Delete this driver?")) return;
+      api(`/drivers/${id}`, { method: 'DELETE' }).then(res => {
+        fetchDrivers();
+      });
+    }
+    function showFilterDrivers() {
+      document.getElementById('filter-driver-form').classList.remove('hidden');
+    }
+    function hideFilterDrivers() {
+      document.getElementById('filter-driver-form').classList.add('hidden');
+    }
+    function filterDrivers() {
+      const isAvailable = document.getElementById('filter-isavailable').value;
+      const minRating = document.getElementById('filter-minrating').value;
+      let url = '/drivers/filtered?';
+      if (isAvailable) url += `isAvailable=${isAvailable}&`;
+      if (minRating) url += `minRating=${minRating}`;
+      api(url).then(res => {
+        const list = document.getElementById('drivers-list');
+        list.innerHTML = "";
+        res.forEach(driver => {
+          const li = document.createElement('li');
+          li.innerHTML = `
+            <div>
+              <b>${driver.name}</b> (${driver.vehicle})<br>
+              License: ${driver.license || '-'} | Rating: ${driver.rating || '-'} | Available: ${driver.isAvailable ? 'Yes' : 'No'}
+            </div>
+            <div class="actions">
+              ${userRole === 'admin' ? `<button onclick="deleteDriver('${driver._id}')">Delete</button>` : ''}
+            </div>
+          `;
+          list.appendChild(li);
+        });
+        hideFilterDrivers();
+      });
+    }
 
-  const data = await res.json();
-  alert(data.message || data.error);
-}
+    // Admin User Management
+    function fetchUsers() {
+      api('/admin/users').then(res => {
+        const list = document.getElementById('users-list');
+        list.innerHTML = "";
+        res.forEach(user => {
+          const li = document.createElement('li');
+          li.innerHTML = `
+            <div>
+              <b>${user.name}</b> (${user.email})<br>
+              Age: ${user.age} | Role: ${user.role} | Admin: ${user.isAdmin ? 'Yes' : 'No'}
+            </div>
+            <div class="actions">
+              <button onclick='showUpdateUser(${JSON.stringify(user)})'>Edit</button>
+              <button onclick="deleteUser('${user._id}')">Delete</button>
+            </div>
+          `;
+          list.appendChild(li);
+        });
+      });
+    }
+    function showUpdateUser(user) {
+      document.getElementById('update-user-id').value = user._id;
+      document.getElementById('update-user-name').value = user.name;
+      document.getElementById('update-user-age').value = user.age;
+      document.getElementById('update-user-email').value = user.email;
+      document.getElementById('update-user-isadmin').checked = user.isAdmin;
+      document.getElementById('update-user-form').classList.remove('hidden');
+    }
+    function hideUpdateUser() {
+      document.getElementById('update-user-form').classList.add('hidden');
+    }
+    function updateUser() {
+      const id = document.getElementById('update-user-id').value;
+      const name = document.getElementById('update-user-name').value;
+      const age = parseInt(document.getElementById('update-user-age').value, 10);
+      const email = document.getElementById('update-user-email').value;
+      const isAdmin = document.getElementById('update-user-isadmin').checked;
+      api(`/admin/users/${id}`, {
+        method: 'PATCH',
+        body: { name, age, email, isAdmin }
+      }).then(res => {
+        document.getElementById('update-user-result').textContent = res.message || "User updated!";
+        document.getElementById('update-user-result').className = "result";
+        fetchUsers();
+        hideUpdateUser();
+      }).catch(err => {
+        document.getElementById('update-user-result').textContent = err.error || "Update failed";
+        document.getElementById('update-user-result').className = "error";
+      });
+    }
+    function deleteUser(id) {
+      if (!confirm("Delete this user?")) return;
+      api(`/admin/users/${id}`, { method: 'DELETE' }).then(res => {
+        fetchUsers();
+      });
+    }
 
-async function login() {
-  const res = await fetch("/users/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      email: document.getElementById("loginEmail").value,
-      password: document.getElementById("loginPassword").value
-    })
-  });
-
-  const data = await res.json();
-  if (data.token) {
-    token = data.token;
-    role = data.role;
-
-    if (role === 'admin') showSection('admin-dashboard');
-    else if (role === 'driver') showSection('driver-dashboard');
-    else showSection('user-dashboard');
-  } else {
-    alert(data.error);
-  }
-}
-
-function logout() {
-  token = null;
-  role = null;
-  document.getElementById('auth-section').style.display = 'flex';
-  document.querySelectorAll('.dashboard').forEach(sec => sec.style.display = 'none');
-}
-</script>
+    // Analytics
+    function fetchPassengerAnalytics() {
+      api('/analytics/passengers').then(res => {
+        const list = document.getElementById('analytics-list');
+        list.innerHTML = "";
+        res.forEach(row => {
+          const li = document.createElement('li');
+          li.innerHTML = `
+            <div>
+              <b>${row.name}</b><br>
+              Total Rides: ${row.totalRides} | Total Fare: $${row.totalFare} | Avg Distance: ${row.avgDistance.toFixed(2)}km
+            </div>
+          `;
+          list.appendChild(li);
+        });
+      });
+    }
+  </script>
 </body>
 </html>
