@@ -1,0 +1,751 @@
+{
+	"info": {
+		"_postman_id": "7917abd5-97b0-43de-9b65-996cc5b67b46",
+		"name": "E-Hailing System 2.0",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "44002628"
+	},
+	"item": [
+		{
+			"name": "Authentication & Users",
+			"item": [
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Irsyad\",\n    \"age\": 1000,\n    \"email\": \"Irsyad@gmail.com\",\n    \"password\": \"irsyad\",\n    \"isAdmin\": false,\n    \"role\": \"user\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register Admin User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Abu\",\n    \"age\": 30,\n    \"email\": \"abu@gmail.com\",\n    \"password\": \"abu\",\n    \"isAdmin\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register Driver User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Driver User\",\n    \"age\": 35,\n    \"email\": \"driver@example.com\",\n    \"password\": \"driverpassword\",\n    \"isAdmin\": false,\n    \"role\": \"driver\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.environment.set(\"jwtToken\", jsonData.token);",
+									"pm.environment.set(\"userRole\", jsonData.role);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"Irsyad@gmail.com\",\n    \"password\": \"irsyad\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.environment.set(\"jwtToken\", jsonData.token);",
+									"pm.environment.set(\"userRole\", jsonData.role);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"abu@gmail.com\",\n    \"password\": \"abu\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login Driver",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.environment.set(\"jwtToken\", jsonData.token);",
+									"pm.environment.set(\"userRole\", jsonData.role);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"macha@gmail.com\",\n    \"password\": \"macha\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Rides",
+			"item": [
+				{
+					"name": "Get All Rides",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/rides",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"rides"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Ride by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/rides/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"rides",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "651a2b3c4d5e6f7a8b9c0d1e"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Ride",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODU3Njk3NGE5YjcyZGUzMzk4NmMyMTYiLCJyb2xlIjoidXNlciIsImlhdCI6MTc1MDU4NTQ5OSwiZXhwIjoxNzUwNTg5MDk5fQ.Z6WXywDPaj65Q20GRpyB5rFf466wdk4GeB9ad1_qw78",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"origin\": \"Ampang Jaya\",\n    \"destination\": \"Puchong\",\n    \"fare\": 40,\n    \"distance\": 17,\n    \"passengerId\": \"68576563e518856ececabbd3\",\n    \"status\": \"pending\"\n}\n"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/rides",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"rides"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Ride",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/rides/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"rides",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "651a2b3c4d5e6f7a8b9c0d1e"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Drivers",
+			"item": [
+				{
+					"name": "Get All Drivers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/drivers",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"drivers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Driver by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/drivers/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"drivers",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "651a2b3c4d5e6f7a8b9c0e1a"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Filtered Drivers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/drivers/filtered?isAvailable=true&minRating=4.0",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"drivers",
+								"filtered"
+							],
+							"query": [
+								{
+									"key": "isAvailable",
+									"value": "true"
+								},
+								{
+									"key": "minRating",
+									"value": "4.0"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add New Driver (Admin Only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODU3Njk3NGE5YjcyZGUzMzk4NmMyMTYiLCJyb2xlIjoidXNlciIsImlhdCI6MTc1MDU2NTQ2OSwiZXhwIjoxNzUwNTY5MDY5fQ.WDblTssu7mpRt9D08PrpO2YblRRhxE62DTfZyxJYd5E",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"\",\n    \"vehicle\": \"Motorcycle\",\n    \"license\": \"XYZ789\",\n    \"rating\": 3.5,\n    \"status\": \"available\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/drivers",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"drivers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Driver Status (Admin/Driver)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODU3NjU0YWU1MTg4NTZlY2VjYWJiZDIiLCJyb2xlIjoiZHJpdmVyIiwiaWF0IjoxNzUwNTU4NDQ3LCJleHAiOjE3NTA1NjIwNDd9.YrwFElw26bQmPmLpUIBQGpUnYdSgEUg2soVcDnCL4QA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"unavailable\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/drivers/:id/status",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"drivers",
+								":id",
+								"status"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "6857654ae518856ececabbd2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Driver Details (Rating) (User/Admin/Driver)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"rating\": 4.9\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/drivers/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"drivers",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "651a2b3c4d5e6f7a8b9c0e1a"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Driver (Admin Only)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/drivers/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"drivers",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "651a2b3c4d5e6f7a8b9c0e1a"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Admin User Management",
+			"item": [
+				{
+					"name": "Get All Users (Admin Only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODU3ODM3OGE5YjcyZGUzMzk4NmMyMTkiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTA1Njk4MTMsImV4cCI6MTc1MDU3MzQxM30.DHeK_qrCK9sbOXbvyXttyaxNXOITg8MzjaNuzjoa0Sw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/admin/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User by ID (Admin Only)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/admin/users/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"users",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "651a2b3c4d5e6f7a8b9c0f1a"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update User Details (Admin Only)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Admin Name\",\n    \"age\": 31,\n    \"email\": \"admin_updated@example.com\",\n    \"isAdmin\": true,\n    \"role\": \"admin\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/users/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"users",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "651a2b3c4d5e6f7a8b9c0f1a"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User (Admin Only)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/admin/users/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"users",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "651a2b3c4d5e6f7a8b9c0f1a"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Analytics",
+			"item": [
+				{
+					"name": "Get Passenger Analytics (Admin Only)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/analytics/passengers",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"analytics",
+								"passengers"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "jwtToken",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
